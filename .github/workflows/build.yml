@@ -1,0 +1,77 @@
+name: Build Bridge Binaries
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Mac binaries (ARM + Intel) and merge into universal
+        run: |
+          npx pkg . --target node18-macos-arm64 --output dist/onops-bridge-mac-arm64 --compress GZip
+          npx pkg . --target node18-macos-x64 --output dist/onops-bridge-mac-x64 --compress GZip
+          lipo -create -output dist/onops-bridge-mac dist/onops-bridge-mac-arm64 dist/onops-bridge-mac-x64
+
+      - name: Make executable
+        run: chmod +x dist/onops-bridge-mac dist/onops-bridge-mac-arm64 dist/onops-bridge-mac-x64
+
+      - name: Upload Mac artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-binaries
+          path: dist/onops-bridge-mac
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Windows binary
+        run: npx pkg . --target node18-win-x64 --output dist/onops-bridge-win.exe --compress GZip
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-binary
+          path: dist/onops-bridge-win.exe
+
+  release:
+    needs: [build-mac, build-windows]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            mac-binaries/onops-bridge-mac
+            windows-binary/onops-bridge-win.exe
+          generate_release_notes: true
+          name: onOPS Bridge ${{ github.ref_name }}

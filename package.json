@@ -1,0 +1,31 @@
+{
+  "name": "onops-bridge",
+  "version": "1.0.0",
+  "description": "onOPS local data bridge — connects your PC/Mac to onOPS",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
+    "build:mac": "pkg . --target node18-macos-arm64,node18-macos-x64 --output dist/onops-bridge-mac --compress GZip",
+    "build:win": "pkg . --target node18-win-x64 --output dist/onops-bridge-win.exe --compress GZip",
+    "build:all": "pkg . --target node18-macos-arm64,node18-macos-x64,node18-win-x64 --compress GZip --out-path dist"
+  },
+  "pkg": {
+    "scripts": "src/**/*.js",
+    "assets": [],
+    "targets": [
+      "node18-macos-arm64",
+      "node18-macos-x64",
+      "node18-win-x64"
+    ],
+    "outputPath": "dist"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}
