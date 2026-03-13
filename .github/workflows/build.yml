@@ -48,8 +48,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build Windows binary
-        run: npx pkg . --target node18-win-x64 --output dist/onops-bridge-win.exe --compress GZip
+      - name: Build Windows binary (Node 16 for broad Windows compatibility)
+        run: npx pkg . --target node16-win-x64 --output dist/onops-bridge-win.exe --compress GZip
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
