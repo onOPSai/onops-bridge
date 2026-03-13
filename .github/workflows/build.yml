@@ -18,7 +18,7 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build Mac binaries (ARM + Intel) and merge into universal
         run: |
@@ -46,7 +46,7 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build Windows binary
         run: npx pkg . --target node18-win-x64 --output dist/onops-bridge-win.exe --compress GZip
