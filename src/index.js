@@ -81,7 +81,15 @@ app.get('/system', requireAuth, (req, res) => {
 // Browse a directory
 app.get('/browse', requireAuth, (req, res) => {
   const config = loadConfig()
-  const targetPath = req.query.path
+  let targetPath = req.query.path
+
+  // Support ?folder=Desktop shortcut — finds the matching allowed path
+  if (!targetPath && req.query.folder) {
+    const folderName = req.query.folder.toString()
+    targetPath = config.allowed_paths.find(p =>
+      path.basename(p).toLowerCase() === folderName.toLowerCase()
+    )
+  }
 
   if (!targetPath) {
     // Return allowed root paths if no path given
